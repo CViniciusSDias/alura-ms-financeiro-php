@@ -35,7 +35,14 @@ $server->on('request', function (Request $request, Response $response) use ($con
 
     $inputData = EnrollClientInputData::fromArray(json_decode($request->rawContent(), true));
     $enrollClient = $container->get(EnrollClient::class);
-    $enrollClient($inputData);
+
+    try {
+        $enrollClient($inputData);
+    } catch (\InvalidArgumentException|\DomainException $exception) {
+        $response->setStatusCode(422);
+        $response->end($exception->getMessage());
+        return;
+    }
 
     $response->setStatusCode(201);
     $response->end();
